@@ -1,0 +1,25 @@
+[tool.poetry]
+name = "tomok2md"
+version = "0.1.0"
+description = ""
+authors = ["Taemin Lee <persuade@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.8"
+requests = "^2.31.0"
+lxml = "^4.9.2"
+ipykernel = "^6.23.1"
+python-pcre = {git = "https://github.com/awahlig/python-pcre"}
+babel = "^2.12.1"
+hml-equation-parser = "^1.0.12"
+pyquery = "^2.0.0"
+fire = "^0.5.0"
+colorlog = "^6.7.0"
+structlog = "^23.1.0"
+tqdm = "^4.65.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
