@@ -11,17 +11,39 @@ class html2md():
         self.doc = doc
         html_str = doc['subView']
         if html_str == '':  # 2023-06-22 empty html 에러 우회
-            html_str = "<body></body>"
+            html_str = "<span></span>"
+        html_str = html_str.replace('<br>','\n')
+        self.make_md(html_str, parser)
+        self.make_md_without_formula(html_str, parser)
+
+    def make_md(self, html_str, parser):
+        self.tree = html.fromstring(html_str, parser=parser)
+        # 타이틀 추가
+        self.title = self.get_title()
+        # 수식 변환
+        self.conv_formula()
+        # 테이블 변환
+        self.conv_table()
+        # 마크다운 변환
+        self.md = self.html2md()
+        self.md_with_title = f'{self.title}\n\n{self.md}'
+        
+    def make_md_without_formula(self, html_str, parser):
+        # 2023-06-23 Q&A chunk json 에서는 그림 제거
         self.tree = html.fromstring(html_str, parser=parser)
         # 수식 변환
         self.conv_formula()
-        # 그림 변환
+        # 그림 제거
+        self.remove_formula()
         # 테이블 변환
         self.conv_table()
-        # 태그 제거
-        self.md = self.html2md()
-        # 타이틀 추가
-        self.md = self.add_title()
+        # 그림 제거 마크다운 변환
+        self.md_without_img = self.html2md()
+    
+    def remove_formula(self):
+        for elem in self.tree.xpath('//img'):
+            elem.getparent().remove(elem)
+
     def conv_formula(self):
         style_symbols = ['rm',
                          'bold',
@@ -279,13 +301,15 @@ class html2md():
         md = md.replace('&gt;', '>')
         # print(md)
         return md
-    def add_title(self):
+
+    def get_title(self):
         title_tree = html.fromstring(self.doc['contentsView'], parser=html.HTMLParser())
 
-        level = int(title_tree.xpath('./a')[0].get('data-level'))
-        title_md = '#' * level + ' ' + title_tree.xpath('./a')[0].text
+        self.level = int(title_tree.xpath('./a')[0].get('data-level'))
+        self.id = title_tree.xpath('./a')[0].text
+        title_md = '#' * self.level + ' ' + title_tree.xpath('./a')[0].text
         # print(title_md)
-        return f'{title_md}\n\n{self.md}'
+        return f'{title_md}'
 
     def conv_table(self):
         # table 태그 선택
